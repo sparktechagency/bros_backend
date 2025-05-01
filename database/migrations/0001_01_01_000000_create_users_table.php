@@ -15,11 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone')->nullable();
             $table->string('role')->default('USER');
             $table->string('photo')->default('default.png');
             $table->string('car_brand')->nullable();
             $table->string('car_model')->nullable();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('otp')->nullable();
+            $table->string('otp_expires_at')->nullable();
             $table->string('password');
             $table->string('google_id')->nullable();
             $table->rememberToken();
