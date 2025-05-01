@@ -20,7 +20,7 @@ class AuthController extends Controller
             'email'     => 'required|email|unique:users,email',
             'car_brand' => 'sometimes|string|max:50',
             'car_model' => 'sometimes|string|max:50',
-            'password'  => 'required|string|min:4',
+            'password'  => 'required|string|min:4|same:c_password',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 400);
@@ -337,6 +337,17 @@ class AuthController extends Controller
             'message' => 'Profile updated successfully.',
             'data'    => $user,
         ], 200);
+    }
+
+    public function logout()
+    {
+        $user = Auth::user();
+        $user->currentAccessToken()->delete();
+
+        return response()->json([
+            'data'    => true,
+            'message' => 'Logged out successfully',
+        ]);
     }
 
 }
