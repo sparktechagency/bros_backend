@@ -262,7 +262,7 @@ class AuthController extends Controller
 
     public function profile()
     {
-        $user = Auth::user();
+        $user = User::with('carPhotos')->where('id', Auth::id())->first();
         return response()->json([
             'status'  => true,
             'message' => 'Profile retreived successfully.',

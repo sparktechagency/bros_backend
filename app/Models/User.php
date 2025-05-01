@@ -48,4 +48,8 @@ class User extends Authenticatable
     {
         return asset('uploads/users/') . "/" . $value;
     }
+
+    public function carPhotos(){
+        return $this->hasMany(CarImage::class);
+    }
 }

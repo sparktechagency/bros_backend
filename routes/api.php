@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\api\Backend\AuthController;
+use App\Http\Controllers\api\Backend\ManageDateController;
+use App\Http\Controllers\api\Backend\PageController;
+use App\Http\Controllers\api\Frontend\CarImageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\api\Backend\AuthController;
-use App\Http\Controllers\api\Backend\PageController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -28,9 +30,13 @@ Route::prefix('auth')->group(function () {
 // admin routes
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::resource('pages', PageController::class)->only(['index', 'store']);
+    Route::resource('manage-dates', ManageDateController::class)->only(['index', 'store', 'destroy']);
 });
 
 // user routes
 Route::middleware(['auth:sanctum', 'user'])->group(function () {
     Route::resource('pages', PageController::class)->only('index');
+    Route::resource('car-photo', CarImageController::class);
+    Route::resource('manage-dates', ManageDateController::class)->only(['index']);
+
 });
