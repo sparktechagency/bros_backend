@@ -25,7 +25,7 @@
         }
 
         .email-header {
-            background-color: #4CAF50;
+            background-color: #4a90e2;
             color: #ffffff;
             text-align: center;
             padding: 20px 10px;
@@ -49,7 +49,7 @@
         .otp {
             font-size: 24px;
             font-weight: bold;
-            color: #4CAF50;
+            color: #4a90e2;
             text-align: center;
             margin: 20px 0;
         }
