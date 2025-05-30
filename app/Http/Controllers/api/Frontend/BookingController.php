@@ -1,12 +1,12 @@
 <?php
 namespace App\Http\Controllers\api\Frontend;
 
-use Exception;
-use App\Models\Booking;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
@@ -16,32 +16,32 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
-       if(Auth::user()->role=='ADMIN'){
-        $search   = $request->search;
-        $bookings = Booking::with('user:id,name,email,photo,car_brand,car_model', 'user.carPhotos:id,user_id,photo')->latest('id');
-        if ($request->filter) {
-            $bookings = $bookings->where('service_id',$request->filter);
-        }
-        if ($request->search) {
-            $bookings = $bookings->whereHas('user', function ($query) use ($search) {
-                $query->where('name', 'LIKE', '%' . $search . '%')->orWhere('email', 'LIKE', '%' . $search . '%');
-            });
-        }
-        $bookings = $bookings->paginate($request->per_page ?? 10);
-        return response()->json([
-            'status'  => true,
-            'message' => 'Booking information retreived successfully',
-            'data'    => $bookings,
-        ]);
-    }else{
-           $bookings = Booking::where('user_id',Auth::user()->id)->latest('id')->paginate($request->per_page ?? 10);
-           return response()->json([
-               'status'  => true,
-               'message' => 'Booking information retreived successfully',
-               'data'    => $bookings,
-           ]);
+        if (Auth::user()->role == 'ADMIN') {
+            $search   = $request->search;
+            $bookings = Booking::with('user:id,name,email,photo,car_brand,car_model', 'user.carPhotos:id,user_id,photo')->latest('id');
+            if ($request->filter) {
+                $bookings = $bookings->where('service_id', $request->filter);
+            }
+            if ($request->search) {
+                $bookings = $bookings->whereHas('user', function ($query) use ($search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%')->orWhere('email', 'LIKE', '%' . $search . '%');
+                });
+            }
+            $bookings = $bookings->paginate($request->per_page ?? 10);
+            return response()->json([
+                'status'  => true,
+                'message' => 'Booking information retreived successfully',
+                'data'    => $bookings,
+            ]);
+        } else {
+            $bookings = Booking::where('user_id', Auth::user()->id)->latest('id')->paginate($request->per_page ?? 10);
+            return response()->json([
+                'status'  => true,
+                'message' => 'Booking information retreived successfully',
+                'data'    => $bookings,
+            ]);
 
-       }
+        }
     }
 
     /**
@@ -59,16 +59,17 @@ class BookingController extends Controller
     {
         $user  = Auth::user();
         $rules = [
-            'service_id'   => 'required|numeric|exists:services,id',
-            'service_name' => 'required|string|max:100',
-            'service_type' => 'required|string|max:100',
-            'booking_date' => 'required|date',
-            'booking_time' => 'required',
-            'price'        => 'required',
-            'booking_note' => 'sometimes|string|max:6000',
-            'full_name'    => 'required|string|max:100',
-            'phone'        => 'required|string|max:20',
-            'email'        => 'required|email|max:200',
+            'service_id'               => 'required|numeric|exists:services,id',
+            'service_name'             => 'required|string|max:100',
+            'service_type'             => 'required|string|max:100',
+            'booking_date'             => 'required|date',
+            'booking_time'             => 'required',
+            'stripe_payment_intent_id' => 'required',
+            'price'                    => 'required',
+            'booking_note'             => 'sometimes|string|max:6000',
+            'full_name'                => 'required|string|max:100',
+            'phone'                    => 'required|string|max:20',
+            'email'                    => 'required|email|max:200',
         ];
         if ($user->car_brand == null || $user->car_model == null) {
             $rules['car_brand'] = 'required|string|max:100';
@@ -90,17 +91,18 @@ class BookingController extends Controller
         }
 
         $booking = Booking::create([
-            'user_id'      => $user->id,
-            'service_id'   => $request->service_id,
-            'service_name' => $request->service_name,
-            'service_type' => $request->service_type,
-            'booking_date' => $request->booking_date,
-            'booking_time' => $request->booking_time,
-            'price'        => $request->price,
-            'booking_note' => $request->booking_note ?? null,
-            'full_name'    => $request->full_name,
-            'phone'        => $request->phone ?? null,
-            'email'        => $request->email ?? null,
+            'user_id'                  => $user->id,
+            'stripe_payment_intent_id' => $request->stripe_payment_intent_id,
+            'service_id'               => $request->service_id,
+            'service_name'             => $request->service_name,
+            'service_type'             => $request->service_type,
+            'booking_date'             => $request->booking_date,
+            'booking_time'             => $request->booking_time,
+            'price'                    => $request->price,
+            'booking_note'             => $request->booking_note ?? null,
+            'full_name'                => $request->full_name,
+            'phone'                    => $request->phone ?? null,
+            'email'                    => $request->email ?? null,
         ]);
 
         return response()->json([
@@ -140,7 +142,7 @@ class BookingController extends Controller
     public function destroy(string $id)
     {
         try {
-            $booking              = Booking::findOrFail($id);
+            $booking = Booking::findOrFail($id);
             $booking->delete();
             return response()->json([
                 'status'  => true,
@@ -157,10 +159,11 @@ class BookingController extends Controller
         }
     }
 
-    public function bookingStatus($id){
+    public function bookingStatus($id)
+    {
         try {
-            $booking              = Booking::findOrFail($id);
-            $booking->status ='Completed';
+            $booking         = Booking::findOrFail($id);
+            $booking->status = 'Completed';
             $booking->save();
             return response()->json([
                 'status'  => true,

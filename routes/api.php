@@ -11,6 +11,7 @@ use App\Http\Controllers\api\Frontend\BookingController;
 use App\Http\Controllers\api\Frontend\CarImageController;
 use App\Http\Controllers\api\Frontend\FeedbackController;
 use App\Http\Controllers\api\Frontend\HomeController;
+use App\Http\Controllers\api\Frontend\StripePaymentController;
 use App\Http\Controllers\api\Frontend\SupportMessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -61,4 +62,7 @@ Route::middleware(['auth:sanctum', 'user'])->group(function () {
     Route::resource('feedbacks', FeedbackController::class)->only('store');
     Route::get('home',[HomeController::class,'home']);
     Route::get('feedback',[HomeController::class,'feedback']);
+
+    // stripe
+    Route::post('booking-intent', [StripePaymentController::class, 'bookingIntent']);
 });
