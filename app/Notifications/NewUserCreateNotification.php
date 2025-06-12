@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -14,19 +12,18 @@ class NewUserCreateNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public $count;
+    public $message;
+
+    public function __construct($count, $message)
     {
-        //
+        $this->count   = $count;
+        $this->message = $message;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -45,10 +42,13 @@ class NewUserCreateNotification extends Notification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+    public function toDatabase($notifiable)
     {
         return [
-            //
+            'count'     => $this->count,
+            'title'     => $this->message,
+            'sub_title' => 'Tap to view new users',
+            'type'      => 'User Registration',
         ];
     }
 }

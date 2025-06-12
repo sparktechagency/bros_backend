@@ -3,6 +3,8 @@ namespace App\Http\Controllers\api\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Feedback;
+use App\Models\User;
+use App\Notifications\NewFeedbackNotification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,6 +55,9 @@ class FeedbackController extends Controller
             'comment'    => $request->comment,
         ]);
 
+        $feedback_id = $feedback->id;
+        $admin       = User::where('id', 1)->first();
+        $admin->notify(new NewFeedbackNotification($feedback_id));
         return response()->json([
             'status'  => true,
             'message' => 'Feedback saved successfully',

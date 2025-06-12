@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $per_page = $request->per_page ?? 10;
-        $users    = User::with('carPhotos')->withCount('bookings')->where('role', 'USER')->latest('id');
+        $users    = User::where('role', 'USER')->latest('id');
         if ($request->search) {
             $users->where(function ($query) use ($request) {
                 $query->where('name', 'LIKE', '%' . $request->search . '%')
@@ -51,7 +51,12 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = User::with('carPhotos')->withCount('bookings')->where('id', $id)->first();
+        return response()->json([
+            'status'  => true,
+            'message' => 'User information retreived successfully',
+            'data'    => $user,
+        ]);
     }
 
     /**

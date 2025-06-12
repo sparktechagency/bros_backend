@@ -3,6 +3,8 @@ namespace App\Http\Controllers\api\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\User;
+use App\Notifications\NewAppoinmentNotification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -104,7 +106,9 @@ class BookingController extends Controller
             'phone'                    => $request->phone ?? null,
             'email'                    => $request->email ?? null,
         ]);
-
+        $appointment_id = $booking->id;
+        $admin          = User::where('id', 1)->first();
+        $admin->notify(new NewAppoinmentNotification($appointment_id));
         return response()->json([
             'status'  => true,
             'message' => 'Booking information saved successfully',

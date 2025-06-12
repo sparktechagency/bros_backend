@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -14,9 +12,10 @@ class NewAppoinmentNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public $appointment_id;
+    public function __construct($appointment_id)
     {
-        //
+        $this->appointment_id = $appointment_id;
     }
 
     /**
@@ -26,7 +25,7 @@ class NewAppoinmentNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -48,7 +47,10 @@ class NewAppoinmentNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title'          => 'New Appointment',
+            'sub_title'      => 'An user booked an appointment.',
+            'type'           => 'New Appointment',
+            'appointment_id' => $this->appointment_id
         ];
     }
 }

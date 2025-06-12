@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -14,9 +12,11 @@ class NewFeedbackNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+
+    public $feedback_id;
+    public function __construct($feedback_id)
     {
-        //
+        $this->feedback_id = $feedback_id;
     }
 
     /**
@@ -26,7 +26,7 @@ class NewFeedbackNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -48,7 +48,10 @@ class NewFeedbackNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title'       => 'New Feedback',
+            'sub_title'   => 'An user just gave a feedback into your service.',
+            'type'        => 'New Feedback',
+            'feedback_id' => $this->feedback_id,
         ];
     }
 }

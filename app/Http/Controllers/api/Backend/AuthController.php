@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\Backend;
 use App\Http\Controllers\Controller;
 use App\Mail\OtpMail;
 use App\Models\User;
+use App\Notifications\NewUserCreateNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -38,6 +39,31 @@ class AuthController extends Controller
         ]);
 
         Mail::to($request->email)->send(new OtpMail($otp));
+        // notification send
+        $admin                = User::where('id', 1)->first();
+        $existingNotification = $admin->unreadNotifications()
+            ->where('type', NewUserCreateNotification::class)
+            ->first();
+        if ($existingNotification) {
+            $data = $existingNotification->data;
+
+            $data['count'] += 1;
+
+            if ($data['count'] > 9) {
+                $data['title'] = "9+ new users registered.";
+            } else {
+                $data['title'] = "{$data['count']} new users registered.";
+            }
+
+            $existingNotification->update([
+                'data' => $data,
+            ]);
+        } else {
+            $count   = 1;
+            $message = "{$count} new user registered.";
+
+            $admin->notify(new NewUserCreateNotification($count, $message));
+        }
 
         return response()->json([
             'status'  => true,
@@ -149,6 +175,33 @@ class AuthController extends Controller
             'google_id'         => $request->google_id ?? null,
             'email_verified_at' => now(),
         ]);
+        if ($user) {
+            // notification send
+            $admin                = User::where('id', 1)->first();
+            $existingNotification = $admin->unreadNotifications()
+                ->where('type', NewUserCreateNotification::class)
+                ->first();
+            if ($existingNotification) {
+                $data = $existingNotification->data;
+
+                $data['count'] += 1;
+
+                if ($data['count'] > 9) {
+                    $data['title'] = "9+ new users registered.";
+                } else {
+                    $data['title'] = "{$data['count']} new users registered.";
+                }
+
+                $existingNotification->update([
+                    'data' => $data,
+                ]);
+            } else {
+                $count   = 1;
+                $message = "{$count} new user registered.";
+
+                $admin->notify(new NewUserCreateNotification($count, $message));
+            }
+        }
         if ($request->hasFile('photo')) {
             $image      = $request->file('photo');
             $final_name = time() . '.' . $image->getClientOriginalExtension();

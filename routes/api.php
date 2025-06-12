@@ -14,6 +14,7 @@ use App\Http\Controllers\api\Frontend\FeedbackController;
 use App\Http\Controllers\api\Frontend\HomeController;
 use App\Http\Controllers\api\Frontend\StripePaymentController;
 use App\Http\Controllers\api\Frontend\SupportMessageController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,12 +44,12 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::resource('manage-dates', ManageDateController::class)->only(['index', 'store', 'destroy']);
     Route::resource('photo-gallery', PhotoGalleryController::class);
     Route::resource('services', ServiceController::class);
-    Route::resource('users', UserController::class)->only('index','destroy');
-    Route::resource('bookings', BookingController::class)->except('store','create');
+    Route::resource('users', UserController::class)->only('index', 'destroy', 'show');
+    Route::resource('bookings', BookingController::class)->except('store', 'create');
     Route::get('booking-status/{id}', [BookingController::class, 'bookingStatus']);
     Route::resource('transactions', TransactionController::class)->only('index');
-    Route::get('dashboard',DashboardController::class);
-    Route::resource('feedbacks', FeedbackController::class)->only('index','destroy');
+    Route::get('dashboard', DashboardController::class);
+    Route::resource('feedbacks', FeedbackController::class)->only('index', 'destroy');
     Route::get('feedback-highlight/{id}', [FeedbackController::class, 'feedbackHighlight']);
 });
 
@@ -60,11 +61,17 @@ Route::middleware(['auth:sanctum', 'user'])->group(function () {
     Route::post('support-message', [SupportMessageController::class, 'supportMessage']);
     Route::resource('photo-gallery', PhotoGalleryController::class)->only('index');
     Route::resource('services', ServiceController::class)->only('index', 'show');
-    Route::resource('bookings', BookingController::class)->only('store','index');
+    Route::resource('bookings', BookingController::class)->only('store', 'index');
     Route::resource('feedbacks', FeedbackController::class)->only('store');
-    Route::get('home',[HomeController::class,'home']);
-    Route::get('feedback',[HomeController::class,'feedback']);
+    Route::get('home', [HomeController::class, 'home']);
+    Route::get('feedback', [HomeController::class, 'feedback']);
 
     // stripe
     Route::post('booking-intent', [StripePaymentController::class, 'bookingIntent']);
+});
+// common routes
+Route::middleware(['auth:sanctum', 'admin.user'])->group(function () {
+    Route::get('notifications', [NotificationController::class, 'notifications'])->name('all_Notification');
+    Route::get('mark-notification/{id}', [NotificationController::class, 'singleMark'])->name('singleMark');
+    Route::get('mark-all-notification', [NotificationController::class, 'allMark'])->name('allMark');
 });
