@@ -52,4 +52,8 @@ class User extends Authenticatable
     public function carPhotos(){
         return $this->hasMany(CarImage::class);
     }
+
+    public function bookings(){
+        return $this->hasMany(Booking::class);
+    }
 }

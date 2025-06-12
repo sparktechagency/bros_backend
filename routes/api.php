@@ -7,6 +7,7 @@ use App\Http\Controllers\api\Backend\PageController;
 use App\Http\Controllers\api\Backend\PhotoGalleryController;
 use App\Http\Controllers\api\Backend\ServiceController;
 use App\Http\Controllers\api\Backend\TransactionController;
+use App\Http\Controllers\api\Backend\UserController;
 use App\Http\Controllers\api\Frontend\BookingController;
 use App\Http\Controllers\api\Frontend\CarImageController;
 use App\Http\Controllers\api\Frontend\FeedbackController;
@@ -42,6 +43,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::resource('manage-dates', ManageDateController::class)->only(['index', 'store', 'destroy']);
     Route::resource('photo-gallery', PhotoGalleryController::class);
     Route::resource('services', ServiceController::class);
+    Route::resource('users', UserController::class)->only('index','destroy');
     Route::resource('bookings', BookingController::class)->except('store','create');
     Route::get('booking-status/{id}', [BookingController::class, 'bookingStatus']);
     Route::resource('transactions', TransactionController::class)->only('index');

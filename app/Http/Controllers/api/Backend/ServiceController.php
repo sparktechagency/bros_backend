@@ -38,7 +38,7 @@ class ServiceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'car_type' => 'required|string|max:50',
-            'icon'     => 'required|mimes:png,jpg,jpeg',
+            'icon'     => 'required|mimes:png,jpg,jpeg|max:10240',
             'interior' => 'required',
             'exterior' => 'required',
             'both'     => 'required',
@@ -105,6 +105,7 @@ class ServiceController extends Controller
             'interior' => 'sometimes|string|max:20',
             'exterior' => 'sometimes|string|max:20',
             'both'     => 'sometimes|string|max:20',
+            'icon'     => 'sometimes|mimes:png,jpg,jpeg|max:10240',
             'time'     => 'sometimes|json',
         ]);
 
@@ -112,8 +113,19 @@ class ServiceController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()], 400);
         }
         try {
+            $service = Service::findOrFail($id);
+            if ($request->hasFile('icon')) {
+                $photo_location     = public_path('uploads/services');
+                $old_photo          = basename($service->icon);
+                $old_photo_location = $photo_location . '/' . $old_photo;
+                if (file_exists($old_photo_location)) {
+                    unlink($old_photo_location);
+                }
 
-            $service           = Service::findOrFail($id);
+                $final_photo_name = time() . '.' . $request->icon->extension();
+                $request->icon->move($photo_location, $final_photo_name);
+                $service->icon = $final_photo_name;
+            }
             $service->interior = $request->interior ?? $service->interior;
             $service->exterior = $request->exterior ?? $service->exterior;
             $service->both     = $request->both ?? $service->both;
