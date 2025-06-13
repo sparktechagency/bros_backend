@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -13,10 +11,12 @@ class BookingSuccessNotification extends Notification
 
     /**
      * Create a new notification instance.
-     */
-    public function __construct()
+     */public $booking_id, $service_name, $service_type;
+    public function __construct($booking_id, $service_name, $service_type)
     {
-        //
+        $this->booking_id   = $booking_id;
+        $this->service_name = $service_name;
+        $this->service_type = $service_type;
     }
 
     /**
@@ -26,7 +26,7 @@ class BookingSuccessNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -48,7 +48,12 @@ class BookingSuccessNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title'        => 'Bros\' are ready to clean your car.',
+            'sub_title'    => 'Booking successful',
+            'type'         => 'Booking successful',
+            'booking_id'   => $this->booking_id,
+            'service_name' => $this->service_name,
+            'service_type' => $this->service_type,
         ];
     }
 }

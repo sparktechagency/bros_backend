@@ -4,7 +4,9 @@ namespace App\Http\Controllers\api\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\User;
+use App\Notifications\BookingSuccessNotification;
 use App\Notifications\NewAppoinmentNotification;
+use App\Notifications\OrderCompleteNotification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -109,6 +111,10 @@ class BookingController extends Controller
         $appointment_id = $booking->id;
         $admin          = User::where('id', 1)->first();
         $admin->notify(new NewAppoinmentNotification($appointment_id));
+        $booking_id   = $booking->id;
+        $service_name = $request->service_name;
+        $service_type = $request->service_type;
+        $user->notify(new BookingSuccessNotification($booking_id, $service_name, $service_type));
         return response()->json([
             'status'  => true,
             'message' => 'Booking information saved successfully',
@@ -169,6 +175,9 @@ class BookingController extends Controller
             $booking         = Booking::findOrFail($id);
             $booking->status = 'Completed';
             $booking->save();
+            $user       = User::findOrFail($booking->user_id);
+            $service_id = $booking->service_id;
+            $user->notify(new OrderCompleteNotification($service_id));
             return response()->json([
                 'status'  => true,
                 'message' => 'Booking status change successfully',

@@ -14,9 +14,10 @@ class OrderCompleteNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public $service_id;
+    public function __construct($service_id)
     {
-        //
+        $this->service_id=$service_id;
     }
 
     /**
@@ -26,7 +27,7 @@ class OrderCompleteNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -48,7 +49,10 @@ class OrderCompleteNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title'        => 'Your car is ready for drive.',
+            'sub_title'    => 'Order Completed',
+            'type'         => 'Order Completed',
+            'service_id'   => $this->service_id,
         ];
     }
 }
