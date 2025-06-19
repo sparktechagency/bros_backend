@@ -22,7 +22,7 @@ class BookingController extends Controller
     {
         if (Auth::user()->role == 'ADMIN') {
             $search   = $request->search;
-            $bookings = Booking::with('user:id,name,email,photo,car_brand,car_model', 'user.carPhotos:id,user_id,photo')->latest('id');
+            $bookings = Booking::with('user:id,name,email,photo,car_brand,car_model')->latest('id');
             if ($request->filter) {
                 $bookings = $bookings->where('service_id', $request->filter);
             }
@@ -127,7 +127,12 @@ class BookingController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $booking = Booking::with('user:id,name,email,photo,car_brand,car_model', 'user.carPhotos:id,user_id,photo')->findOrFail($id);
+         return response()->json([
+            'status'  => true,
+            'message' => 'Booking information retreived successfully',
+            'data'    => $booking,
+        ]);
     }
 
     /**

@@ -107,6 +107,7 @@ class ServiceController extends Controller
             'both'     => 'sometimes|string|max:20',
             'icon'     => 'sometimes|mimes:png,jpg,jpeg|max:10240',
             'time'     => 'sometimes|json',
+            'car_type' => 'required|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -129,7 +130,10 @@ class ServiceController extends Controller
             $service->interior = $request->interior ?? $service->interior;
             $service->exterior = $request->exterior ?? $service->exterior;
             $service->both     = $request->both ?? $service->both;
-            $service->time     = $request->time ?? $service->time;
+            $service->car_type = $request->car_type ?? $service->car_type;
+            if ($request->time) {
+                $service->time = $request->time ?? $service->time;
+            }
             $service->save();
             return response()->json([
                 'status'  => true,
@@ -151,6 +155,28 @@ class ServiceController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $service            = Service::findOrFail($id);
+            $photo_location     = public_path('uploads/services');
+            $old_photo          = basename($service->icon);
+            $old_photo_location = $photo_location . '/' . $old_photo;
+            if (file_exists($old_photo_location)) {
+                unlink($old_photo_location);
+            }
+            $service->delete();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Service deleted successfully',
+                'data'    => $service,
+            ]);
+        } catch (Exception $e) {
+            Log::error('service deleted error: ' . $e->getMessage());
+            return response()->json([
+                'status'  => false,
+                'message' => 'data not found',
+                'data'    => null,
+            ]);
+        }
     }
 }

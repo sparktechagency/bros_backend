@@ -1,16 +1,17 @@
 <?php
 namespace App\Http\Controllers\api\Backend;
 
-use App\Http\Controllers\Controller;
-use App\Mail\OtpMail;
 use App\Models\User;
-use App\Notifications\NewUserCreateNotification;
+use App\Mail\OtpMail;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use App\Notifications\NewUserCreateNotification;
 
 class AuthController extends Controller
 {
@@ -403,4 +404,38 @@ class AuthController extends Controller
         ]);
     }
 
+
+public function validateToken(Request $request)
+{
+    $user = $request->user();
+
+    if (!$user) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Invalid or missing token.',
+        ], 401);
+    }
+
+    $tokenString = $request->bearerToken();
+    $accessToken = PersonalAccessToken::findToken($tokenString);
+
+    if (!$accessToken) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Token not found.',
+        ], 401);
+    }
+
+    if ($accessToken->expires_at && $accessToken->expires_at->isPast()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Token expired.',
+        ], 401);
+    }
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Token is valid.',
+    ]);
+}
 }
