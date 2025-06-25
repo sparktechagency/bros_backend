@@ -6,6 +6,7 @@ use App\Http\Controllers\api\Backend\ManageDateController;
 use App\Http\Controllers\api\Backend\PageController;
 use App\Http\Controllers\api\Backend\PhotoGalleryController;
 use App\Http\Controllers\api\Backend\ServiceController;
+use App\Http\Controllers\api\Backend\ServiceTimeController;
 use App\Http\Controllers\api\Backend\TransactionController;
 use App\Http\Controllers\api\Backend\UserController;
 use App\Http\Controllers\api\Frontend\BookingController;
@@ -31,10 +32,11 @@ Route::prefix('auth')->group(function () {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::middleware('auth:sanctum')->group(function () {
-          Route::get('check-token', [AuthController::class, 'validateToken'])->name('validateToken');
+        Route::get('check-token', [AuthController::class, 'validateToken'])->name('validateToken');
         Route::get('profile', [AuthController::class, 'profile']);
         Route::post('change-password', [AuthController::class, 'changePassword']);
         Route::post('change-profile', [AuthController::class, 'changeProfile']);
+        Route::post('change-profile-photo', [AuthController::class, 'changeProfilePhoto']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
@@ -45,8 +47,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::resource('manage-dates', ManageDateController::class)->only(['index', 'store', 'destroy']);
     Route::resource('photo-gallery', PhotoGalleryController::class);
     Route::resource('services', ServiceController::class);
+    Route::resource('service_times', ServiceTimeController::class);
     Route::resource('users', UserController::class)->only('index', 'destroy', 'show');
-    Route::resource('bookings', BookingController::class)->except('store', 'create');
+    Route::resource('bookings', BookingController::class)->except('store', 'create', 'show');
     Route::get('booking-status/{id}', [BookingController::class, 'bookingStatus']);
     Route::resource('transactions', TransactionController::class)->only('index');
     Route::get('dashboard', DashboardController::class);
@@ -56,23 +59,27 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
 
 // user routes
 Route::middleware(['auth:sanctum', 'user'])->group(function () {
-    Route::resource('pages', PageController::class)->only('index');
     Route::resource('car-photo', CarImageController::class);
     Route::resource('manage-dates', ManageDateController::class)->only(['index']);
-    Route::post('support-message', [SupportMessageController::class, 'supportMessage']);
     Route::resource('photo-gallery', PhotoGalleryController::class)->only('index');
     Route::resource('services', ServiceController::class)->only('index', 'show');
-    Route::resource('bookings', BookingController::class)->only('store', 'index');
+    Route::resource('bookings', BookingController::class)->only('store', 'index', 'show');
     Route::resource('feedbacks', FeedbackController::class)->only('store');
-    Route::get('home', [HomeController::class, 'home']);
-    Route::get('feedback', [HomeController::class, 'feedback']);
+    // Route::get('home', [HomeController::class, 'home']);
+    Route::get('get_free_times', [BookingController::class, 'getFreeTimes']);
 
     // stripe
     Route::post('booking-intent', [StripePaymentController::class, 'bookingIntent']);
 });
 // common routes
 Route::middleware(['auth:sanctum', 'admin.user'])->group(function () {
+    Route::resource('bookings', BookingController::class)->only('show');
     Route::get('notifications', [NotificationController::class, 'notifications'])->name('all_Notification');
-    Route::get('mark-notification/{id}', [NotificationController::class, 'singleMark'])->name('singleMark');
-    Route::get('mark-all-notification', [NotificationController::class, 'allMark'])->name('allMark');
+    Route::post('mark-notification/{id}', [NotificationController::class, 'singleMark'])->name('singleMark');
+    Route::post('mark-all-notification', [NotificationController::class, 'allMark'])->name('allMark');
 });
+
+Route::get('feedback', [HomeController::class, 'feedback']);
+Route::get('home', [HomeController::class, 'home']);
+Route::resource('pages', PageController::class)->only('index');
+Route::post('support-message', [SupportMessageController::class, 'supportMessage']);

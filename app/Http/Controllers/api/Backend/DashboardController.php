@@ -30,6 +30,7 @@ class DashboardController extends Controller
             DB::raw('COUNT(*) as total')
         )
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+             ->whereYear('created_at', Carbon::now()->year)
             ->groupBy('day')
             ->get()
             ->pluck('total', 'day');
@@ -55,6 +56,7 @@ class DashboardController extends Controller
                 DB::raw('COUNT(*) as count')
             )
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+             ->whereYear('created_at', Carbon::now()->year)
             ->groupBy('day')
             ->get()
             ->keyBy('day');
@@ -68,7 +70,7 @@ class DashboardController extends Controller
 
             $earning_statistics->push([
                 'day'   => $day,
-                'total' => $total,
+                'total' => round($total, 2),
             ]);
 
             $weeklyTotal += $total;

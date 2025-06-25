@@ -15,7 +15,7 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $services = Service::get();
+        $services = Service::with('serviceTimes:id,service_id,time')->get();
         return response()->json([
             'status'  => true,
             'message' => 'Service retreived successfully',
@@ -72,7 +72,7 @@ class ServiceController extends Controller
     public function show(string $id)
     {
         try {
-            $service = Service::findOrFail($id);
+            $service = Service::with('serviceTimes:id,service_id,time')->findOrFail($id);
             return response()->json([
                 'status'  => true,
                 'message' => 'Single service retreived successfully',
@@ -106,7 +106,6 @@ class ServiceController extends Controller
             'exterior' => 'sometimes|string|max:20',
             'both'     => 'sometimes|string|max:20',
             'icon'     => 'sometimes|mimes:png,jpg,jpeg|max:10240',
-            'time'     => 'sometimes|json',
             'car_type' => 'required|string|max:50',
         ]);
 
@@ -131,9 +130,6 @@ class ServiceController extends Controller
             $service->exterior = $request->exterior ?? $service->exterior;
             $service->both     = $request->both ?? $service->both;
             $service->car_type = $request->car_type ?? $service->car_type;
-            if ($request->time) {
-                $service->time = $request->time ?? $service->time;
-            }
             $service->save();
             return response()->json([
                 'status'  => true,

@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('services', function (Blueprint $table) {
+        Schema::create('service_times', function (Blueprint $table) {
             $table->id();
-            $table->string('car_type')->nullable();
-            $table->string('icon')->nullable();
-            $table->float('interior')->nullable();
-            $table->float('exterior')->nullable();
-            $table->float('both')->nullable();
+            $table->foreignId('service_id')->constrained('services')->onDelete('cascade');
+            $table->string('time');
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('services');
+        Schema::dropIfExists('service_times');
     }
 };

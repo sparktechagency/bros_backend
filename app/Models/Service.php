@@ -17,4 +17,9 @@ class Service extends Model
     public function getTimeAttribute($value){
        return json_decode($value);
     }
+
+    public function serviceTimes()
+    {
+        return $this->hasMany(ServiceTime::class);
+    }
 }

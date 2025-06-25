@@ -3,6 +3,7 @@ namespace App\Http\Controllers\api\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\ServiceTime;
 use App\Models\User;
 use App\Notifications\BookingSuccessNotification;
 use App\Notifications\NewAppoinmentNotification;
@@ -128,7 +129,7 @@ class BookingController extends Controller
     public function show(string $id)
     {
         $booking = Booking::with('user:id,name,email,photo,car_brand,car_model', 'user.carPhotos:id,user_id,photo')->findOrFail($id);
-         return response()->json([
+        return response()->json([
             'status'  => true,
             'message' => 'Booking information retreived successfully',
             'data'    => $booking,
@@ -196,5 +197,35 @@ class BookingController extends Controller
                 'data'    => null,
             ]);
         }
+    }
+
+    public function getFreeTimes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date'       => 'required|date:Y-m-d',
+            'service_id' => 'required|numeric|exists:services,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => false,
+                'message' => $validator->errors(),
+            ]);
+        }
+        $service_times = ServiceTime::where('service_id', $request->service_id)
+            ->pluck('time')
+            ->toArray();
+
+       $booked_times = Booking::where('service_id', $request->service_id)
+            ->where('booking_date', $request->date)
+            ->pluck('booking_time')
+            ->toArray();
+
+      $free_times = array_values(array_diff($service_times, $booked_times));
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Free times for the date ' . ($request->date) . ' and service ' . ($request->service_id) . ' retreived successfully',
+            'data'    => $free_times,
+        ]);
     }
 }

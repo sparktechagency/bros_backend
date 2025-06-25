@@ -1,17 +1,17 @@
 <?php
 namespace App\Http\Controllers\api\Backend;
 
-use App\Models\User;
-use App\Mail\OtpMail;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\OtpMail;
+use App\Models\User;
+use App\Notifications\NewUserCreateNotification;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Support\Facades\Validator;
-use App\Notifications\NewUserCreateNotification;
+use Illuminate\Support\Str;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -404,38 +404,69 @@ class AuthController extends Controller
         ]);
     }
 
+    public function validateToken(Request $request)
+    {
+        $user = $request->user();
 
-public function validateToken(Request $request)
-{
-    $user = $request->user();
+        if (! $user) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Invalid or missing token.',
+            ], 401);
+        }
 
-    if (!$user) {
+        $tokenString = $request->bearerToken();
+        $accessToken = PersonalAccessToken::findToken($tokenString);
+
+        if (! $accessToken) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Token not found.',
+            ], 401);
+        }
+
+        if ($accessToken->expires_at && $accessToken->expires_at->isPast()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Token expired.',
+            ], 401);
+        }
+
         return response()->json([
-            'status' => false,
-            'message' => 'Invalid or missing token.',
-        ], 401);
+            'status'  => true,
+            'message' => 'Token is valid.',
+        ]);
     }
 
-    $tokenString = $request->bearerToken();
-    $accessToken = PersonalAccessToken::findToken($tokenString);
+    public function changeProfilePhoto(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'photo' => 'required|mimes:png,jpg,jpeg',
+        ]);
 
-    if (!$accessToken) {
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 400);
+        }
+        $user = Auth::user();
+        if ($request->hasFile('photo')) {
+            $photo_location = public_path('uploads/users');
+            $old_photo      = basename($user->photo);
+            if ($old_photo != 'default.png') {
+                $old_photo_location = $photo_location . '/' . $old_photo;
+                if (file_exists($old_photo_location)) {
+                    unlink($old_photo_location);
+                }
+            }
+
+            $final_photo_name = time() . '.' . $request->photo->extension();
+            $request->photo->move($photo_location, $final_photo_name);
+            $user->photo = $final_photo_name;
+        }
+        $user->save();
         return response()->json([
-            'status' => false,
-            'message' => 'Token not found.',
-        ], 401);
+            'status'  => true,
+            'message' => 'Profile photo updated successfully.',
+            'data'    => $user,
+        ], 200);
     }
-
-    if ($accessToken->expires_at && $accessToken->expires_at->isPast()) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Token expired.',
-        ], 401);
-    }
-
-    return response()->json([
-        'status' => true,
-        'message' => 'Token is valid.',
-    ]);
-}
 }
