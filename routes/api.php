@@ -61,7 +61,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
 Route::middleware(['auth:sanctum', 'user'])->group(function () {
     Route::resource('car-photo', CarImageController::class);
     Route::resource('manage-dates', ManageDateController::class)->only(['index']);
-    Route::resource('photo-gallery', PhotoGalleryController::class)->only('index');
+  
     Route::resource('services', ServiceController::class)->only('index', 'show');
     Route::resource('bookings', BookingController::class)->only('store', 'index', 'show');
     Route::resource('feedbacks', FeedbackController::class)->only('store');
@@ -83,3 +83,4 @@ Route::get('feedback', [HomeController::class, 'feedback']);
 Route::get('home', [HomeController::class, 'home']);
 Route::resource('pages', PageController::class)->only('index');
 Route::post('support-message', [SupportMessageController::class, 'supportMessage']);
+  Route::resource('photo-gallery', PhotoGalleryController::class)->only('index');
