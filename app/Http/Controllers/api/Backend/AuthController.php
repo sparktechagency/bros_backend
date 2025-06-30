@@ -39,7 +39,7 @@ class AuthController extends Controller
             'otp_expires_at' => $otp_expires_at,
         ]);
 
-        Mail::to($request->email)->send(new OtpMail($otp));
+        Mail::to($request->email)->queue(new OtpMail($otp));
         // notification send
         $admin                = User::where('id', 1)->first();
         $existingNotification = $admin->unreadNotifications()

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\BookingSuccessNotification;
 use App\Notifications\NewAppoinmentNotification;
 use App\Notifications\OrderCompleteNotification;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -71,10 +72,7 @@ class BookingController extends Controller
             'booking_time'             => 'required',
             'stripe_payment_intent_id' => 'required',
             'price'                    => 'required',
-            'booking_note'             => 'sometimes|string|max:6000',
-            'full_name'                => 'required|string|max:100',
-            'phone'                    => 'required|string|max:20',
-            'email'                    => 'required|email|max:200',
+            'booking_note'             => 'nullable|string|max:6000',
         ];
         if ($user->car_brand == null || $user->car_model == null) {
             $rules['car_brand'] = 'required|string|max:100';
@@ -102,12 +100,12 @@ class BookingController extends Controller
             'service_name'             => $request->service_name,
             'service_type'             => $request->service_type,
             'booking_date'             => $request->booking_date,
-            'booking_time'             => $request->booking_time,
+            'booking_time'             => Carbon::createFromFormat('h:i A', $request->booking_time),
             'price'                    => $request->price,
             'booking_note'             => $request->booking_note ?? null,
-            'full_name'                => $request->full_name,
-            'phone'                    => $request->phone ?? null,
-            'email'                    => $request->email ?? null,
+            'full_name'                => Auth::user()->name ?? null,
+            'phone'                    => Auth::user()->phone ?? null,
+            'email'                    => Auth::user()->email ?? null,
         ]);
         $appointment_id = $booking->id;
         $admin          = User::where('id', 1)->first();
@@ -215,12 +213,12 @@ class BookingController extends Controller
             ->pluck('time')
             ->toArray();
 
-       $booked_times = Booking::where('service_id', $request->service_id)
+        $booked_times = Booking::where('service_id', $request->service_id)
             ->where('booking_date', $request->date)
             ->pluck('booking_time')
             ->toArray();
 
-      $free_times = array_values(array_diff($service_times, $booked_times));
+        $free_times = array_values(array_diff($service_times, $booked_times));
 
         return response()->json([
             'status'  => true,

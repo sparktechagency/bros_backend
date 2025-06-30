@@ -37,7 +37,7 @@ class HomeController extends Controller
         $highlighted_feedbacks=Feedback::with('user:id,name,photo')->where('is_highlight',1)->latest('id')->take(3)->get();
         return response()->json([
             'status'  => true,
-            'message' => 'Feedback retreived successfully',
+            'message' => 'Feedback retreived successfully(Web)',
             'data'    => $highlighted_feedbacks,
         ]);
     }

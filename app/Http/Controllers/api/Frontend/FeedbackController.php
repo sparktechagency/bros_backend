@@ -21,7 +21,7 @@ class FeedbackController extends Controller
         $feedbacks = Feedback::with('user:id,name,photo')->latest('id')->paginate($request->per_page ?? 10);
         return response()->json([
             'status'  => true,
-            'message' => 'Feedback retreived successfully',
+            'message' => 'Feedback retreived successfully(Dashboard)',
             'data'    => $feedbacks,
         ]);
     }

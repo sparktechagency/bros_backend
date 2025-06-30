@@ -40,6 +40,7 @@ class OtpMail extends Mailable implements ShouldQueue
     {
         return new Content(
             view: 'email.otp',
+            with: ['otp' => $this->otp],
         );
     }
 

@@ -48,7 +48,7 @@ class BookingSuccessNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'title'        => 'Bros\' are ready to clean your car.',
+            'title'        => 'FULL CIRCLE are ready to clean your car.',
             'sub_title'    => 'Booking successful',
             'type'         => 'Booking successful',
             'booking_id'   => $this->booking_id,
