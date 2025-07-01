@@ -15,7 +15,7 @@ class Booking extends Model
         return $this->belongsTo(Service::class);
     }
     public function getBookingDateAttribute($value){
-        return Carbon::parse($value)->format('l,F d,Y');
+        return Carbon::parse($value)->format('F d,Y');
     }
     public function getBookingTimeAttribute($value){
         return Carbon::parse($value)->format('h:i A');
