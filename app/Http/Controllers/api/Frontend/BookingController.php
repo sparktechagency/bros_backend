@@ -103,9 +103,13 @@ class BookingController extends Controller
             'booking_time'             => Carbon::createFromFormat('h:i A', $request->booking_time),
             'price'                    => $request->price,
             'booking_note'             => $request->booking_note ?? null,
-            'full_name'                => Auth::user()->name ?? null,
-            'phone'                    => Auth::user()->phone ?? null,
-            'email'                    => Auth::user()->email ?? null,
+            'full_name'                => $request->full_name ?? Auth::user()->name,
+            'phone'                    => $request->phone ?? Auth::user()->phone,
+            'email'                    => $request->email ?? Auth::user()->email,
+
+            //           'full_name'                => $request->full_name,
+            // 'phone'                    =>  ?? null,
+            // 'email'                    => $request->email ?? null,
         ]);
         $appointment_id = $booking->id;
         $admin          = User::where('id', 1)->first();
