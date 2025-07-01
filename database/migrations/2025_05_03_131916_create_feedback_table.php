@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('service_id')->constrained('services')->cascadeOnDelete();
-            $table->integer('rating');
+            $table->float('rating');
             $table->text('comment');
             $table->boolean('is_highlight')->default(false);
             $table->timestamps();
