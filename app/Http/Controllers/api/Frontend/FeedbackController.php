@@ -41,7 +41,7 @@ class FeedbackController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'service_id' => 'required|numeric|exists:services,id',
-            'rating'     => 'required|numeric|max:5|min:1',
+            'rating'     => 'required|numeric|max:5|min:0.5',
             'comment'    => 'required|string|max:4000',
         ]);
 
