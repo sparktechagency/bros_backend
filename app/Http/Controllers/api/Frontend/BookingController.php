@@ -106,10 +106,6 @@ class BookingController extends Controller
             'full_name'                => $request->full_name ?? Auth::user()->name,
             'phone'                    => $request->phone ?? Auth::user()->phone,
             'email'                    => $request->email ?? Auth::user()->email,
-
-            //           'full_name'                => $request->full_name,
-            // 'phone'                    =>  ?? null,
-            // 'email'                    => $request->email ?? null,
         ]);
         $appointment_id = $booking->id;
         $admin          = User::where('id', 1)->first();
